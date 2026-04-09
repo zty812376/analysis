@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Analysis Demo
 
-## Getting Started
+这个仓库现在包含两部分可运行能力：
 
-First, run the development server:
+1. LangGraph + Next.js 16 的服务端状态图示例
+2. SiliconFlow Embeddings 的服务端封装与测试界面
+
+## 启动
+
+先配置环境变量：
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+在 `.env.local` 或 `.env` 中填入：
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+SILICONFLOW_API_KEY=your_siliconflow_token_here
+SILICONFLOW_EMBEDDING_MODEL=BAAI/bge-large-zh-v1.5
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+然后启动开发环境：
 
-## Learn More
+```bash
+pnpm dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+打开 [http://localhost:3000](http://localhost:3000)。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Embedding 接口
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+项目新增了服务端接口：
 
-## Deploy on Vercel
+```bash
+POST /api/embeddings
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+请求体：
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```json
+{
+  "input": "Silicon flow embedding online: fast, affordable, and high-quality embedding services. come try it out!"
+}
+```
+
+本地调用示例：
+
+```bash
+curl --request POST \
+  --url http://localhost:3000/api/embeddings \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "input": "Silicon flow embedding online: fast, affordable, and high-quality embedding services. come try it out!"
+  }'
+```
+
+## 代码位置
+
+- `lib/embeddings/siliconflow.ts`: SiliconFlow embedding client
+- `app/api/embeddings/route.ts`: Embedding API Route Handler
+- `components/embedding-playground.tsx`: 前端测试面板
+- `lib/langgraph/demo-graph.ts`: LangGraph 示例图
+- `app/api/langgraph/route.ts`: LangGraph API Route Handler

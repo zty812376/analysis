@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LangGraph x Next.js Demo",
-  description: "在 Next.js 16 项目中集成最新版 LangGraph 的可运行示例。",
+  title: "LangGraph x Embeddings x Next.js Demo",
+  description:
+    "在 Next.js 16 项目中集成最新版 LangGraph 与 SiliconFlow Embeddings 的可运行示例。",
 };
 
 export default function RootLayout({
