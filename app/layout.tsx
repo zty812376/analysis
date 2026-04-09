@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LangGraph x Embeddings x Next.js Demo",
+  title: "Word Semantic Chunking Demo",
   description:
-    "在 Next.js 16 项目中集成最新版 LangGraph 与 SiliconFlow Embeddings 的可运行示例。",
+    "上传 DOC 或 DOCX 文档，使用 Doubao Seed 2.0 Pro 按语义分块并展示结果。",
 };
 
 export default function RootLayout({

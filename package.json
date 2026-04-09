@@ -11,9 +11,12 @@
   "dependencies": {
     "@langchain/core": "^1.1.39",
     "@langchain/langgraph": "^1.2.8",
+    "@types/word-extractor": "^1.0.6",
+    "mammoth": "^1.12.0",
     "next": "16.2.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "word-extractor": "^1.0.4",
     "zod": "^4.3.6"
   },
   "devDependencies": {
