@@ -1,26 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4f6f8;
+  --foreground: #111827;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: "Avenir Next", "SF Pro Text", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "SF Mono", "Consolas", monospace;
 }
 
 body {
+  min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-image:
+    radial-gradient(circle at top left, rgba(15, 118, 110, 0.18), transparent 28%),
+    radial-gradient(circle at top right, rgba(14, 116, 144, 0.14), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(244, 246, 248, 0.98));
+  font-family: "Avenir Next", "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+::selection {
+  background: rgba(15, 118, 110, 0.2);
 }
