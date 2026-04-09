@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Word Semantic Chunking Demo",
+  title: "文稿语义分块演示",
   description:
     "上传 DOC 或 DOCX 文档，使用 Doubao Seed 2.0 Pro 按语义分块并展示结果。",
 };

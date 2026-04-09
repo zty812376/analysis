@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f6f8;
-  --foreground: #111827;
+  --background: #f3ebdf;
+  --foreground: #1b1714;
+  --paper: #fbf6ee;
+  --paper-deep: #efe4d2;
+  --ink-soft: #6b5e51;
+  --accent: #7b3526;
+  --accent-strong: #102f50;
+  --rule: rgba(38, 28, 20, 0.12);
 }
 
 @theme inline {
@@ -10,6 +16,7 @@
   --color-foreground: var(--foreground);
   --font-sans: "Avenir Next", "SF Pro Text", "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", "SF Mono", "Consolas", monospace;
+  --font-serif: "Iowan Old Style", "Baskerville", "Palatino Linotype", "Book Antiqua", serif;
 }
 
 body {
@@ -17,12 +24,19 @@ body {
   background: var(--background);
   color: var(--foreground);
   background-image:
-    radial-gradient(circle at top left, rgba(15, 118, 110, 0.18), transparent 28%),
-    radial-gradient(circle at top right, rgba(14, 116, 144, 0.14), transparent 24%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(244, 246, 248, 0.98));
+    linear-gradient(180deg, rgba(251, 246, 238, 0.97), rgba(243, 235, 223, 0.98)),
+    radial-gradient(circle at top left, rgba(123, 53, 38, 0.12), transparent 28%),
+    radial-gradient(circle at 88% 12%, rgba(16, 47, 80, 0.1), transparent 26%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(27, 23, 20, 0.025) 0,
+      rgba(27, 23, 20, 0.025) 1px,
+      transparent 1px,
+      transparent 92px
+    );
   font-family: "Avenir Next", "SF Pro Text", "Segoe UI", sans-serif;
 }
 
 ::selection {
-  background: rgba(15, 118, 110, 0.2);
+  background: rgba(123, 53, 38, 0.18);
 }
