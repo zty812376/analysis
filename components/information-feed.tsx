@@ -155,47 +155,48 @@ function renderFeedRow(item: InformationItemRecord, keySuffix = "") {
   return (
     <article
       key={`${item.id}${keySuffix}`}
-      className="group grid grid-cols-[84px_104px_92px_minmax(0,1fr)] gap-3 border-b border-white/8 px-4 py-3 transition hover:bg-white/[0.035] sm:grid-cols-[88px_120px_104px_minmax(0,1fr)]"
+      className="group grid grid-cols-[72px_minmax(0,1fr)] gap-3 border-b border-white/8 px-4 py-2.5 transition hover:bg-white/[0.035] sm:grid-cols-[78px_minmax(0,1fr)]"
     >
       <div className="font-mono text-[0.78rem] font-medium tracking-[0.08em] text-amber-200">
         {formatHeadlineTime(item.publishedAt)}
       </div>
 
       <div className="min-w-0">
-        <span
-          className={`inline-flex max-w-full items-center gap-2 rounded-full px-2.5 py-1 text-[0.66rem] font-medium uppercase tracking-[0.14em] ${tone.chipClassName}`}
-        >
-          <span className={`h-1.5 w-1.5 rounded-full ${tone.dotClassName}`} />
-          <span className="truncate">{item.categoryLabel}</span>
-        </span>
-      </div>
-
-      <div className="truncate font-mono text-[0.72rem] tracking-[0.08em] text-slate-400">
-        {formatSourceLabel(item)}
-      </div>
-
-      <div className="min-w-0">
-        <div className="flex items-start gap-3">
-          <div className={`mt-1 h-10 w-1 rounded-full ${tone.meterClassName}`} />
+        <div className="flex items-start gap-2.5">
+          <div className={`mt-1 h-9 w-1 rounded-full ${tone.meterClassName}`} />
           <div className="min-w-0 flex-1">
-            <h3 className="text-[0.96rem] font-semibold leading-6 tracking-[-0.02em] text-white">
-              <a
-                href={item.sourceUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="transition hover:text-amber-100"
-              >
-                {item.title}
-              </a>
-            </h3>
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.76rem] text-slate-400">
-              <span>{item.sourceName}</span>
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+              <span className="max-w-full truncate font-mono text-[0.7rem] tracking-[0.12em] text-amber-200/90">
+                {formatSourceLabel(item)}
+              </span>
+              <h3 className="min-w-0 flex-1 text-[0.96rem] font-semibold leading-5 tracking-[-0.02em] text-white">
+                <a
+                  href={item.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="transition hover:text-amber-100"
+                >
+                  {item.title}
+                </a>
+              </h3>
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.74rem] text-slate-400">
               {item.author ? <span>{item.author}</span> : null}
               <span>{formatPublishedAt(item.publishedAt)}</span>
             </div>
-            <p className="mt-1 text-[0.86rem] leading-6 text-slate-300">
+            <p className="mt-1 text-[0.84rem] leading-6 text-slate-300">
               {item.summary}
             </p>
+            <div className="mt-2">
+              <span
+                className={`inline-flex max-w-full items-center gap-2 rounded-full px-2.5 py-1 text-[0.64rem] font-medium uppercase tracking-[0.14em] ${tone.chipClassName}`}
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${tone.dotClassName}`}
+                />
+                <span className="truncate">{item.categoryLabel}</span>
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -610,10 +611,8 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.16fr)_336px]">
         <section className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#04070c] shadow-[0_20px_70px_rgba(0,0,0,0.45)]">
           <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3 sm:px-5">
-            <div className="grid grid-cols-[84px_104px_92px_minmax(0,1fr)] gap-3 font-mono text-[0.68rem] tracking-[0.16em] text-slate-500 sm:grid-cols-[88px_120px_104px_minmax(0,1fr)]">
+            <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-3 font-mono text-[0.68rem] tracking-[0.16em] text-slate-500 sm:grid-cols-[78px_minmax(0,1fr)]">
               <span>时间</span>
-              <span>分类</span>
-              <span>来源</span>
               <span>信号内容</span>
             </div>
             <span className="hidden shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 font-mono text-[0.68rem] tracking-[0.14em] text-slate-400 lg:inline-flex">

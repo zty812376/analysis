@@ -257,10 +257,7 @@ function classifyHeuristically(items: RawFeedItem[]) {
     .filter(shouldKeepCandidate)
     .map<ClassifiedItem>((item) => {
       const combined = getCombinedItemText(item);
-      const summary =
-        item.description && item.description.length > 16
-          ? `来源 ${item.sourceName}：${item.description}`
-          : `来源 ${item.sourceName}：${item.title}`;
+      const summary = item.description
       const topicTags = item.topics
         .map((topic) => normalizeText(topic))
         .filter(Boolean)
