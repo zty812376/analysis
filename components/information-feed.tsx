@@ -190,6 +190,8 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
   const [refreshError, setRefreshError] = useState<string | null>(
     initialSnapshot.error
   );
+  const [selectedCategory, setSelectedCategory] =
+    useState<InformationCategoryKey | null>(null);
   const [isPending, startRefreshTransition] = useTransition();
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
   const lastRefreshAttemptAtRef = useRef(0);
@@ -201,6 +203,9 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
   const feedHoveringRef = useRef(false);
   const feedManualScrollStopTimerRef = useRef<number | null>(null);
   const items = useDeferredValue(snapshot.items);
+  const filteredItems = selectedCategory
+    ? items.filter((item) => item.category === selectedCategory)
+    : items;
 
   const fetchSnapshot = useEffectEvent(async () => {
     const response = await fetch("/api/information", {
@@ -297,7 +302,18 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
       feedProgrammaticScrollRef.current = true;
       scrollArea.scrollTop = maxScrollTop;
     }
-  }, [items]);
+  }, [filteredItems.length]);
+
+  useEffect(() => {
+    const scrollArea = feedScrollAreaRef.current;
+
+    if (!scrollArea) {
+      return;
+    }
+
+    feedProgrammaticScrollRef.current = true;
+    scrollArea.scrollTop = 0;
+  }, [selectedCategory]);
 
   useEffect(() => {
     const tick = (timestamp: number) => {
@@ -339,7 +355,7 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
       feedAnimationFrameRef.current = null;
       lastFeedFrameAtRef.current = null;
     };
-  }, [items.length]);
+  }, [filteredItems.length]);
 
   function handleManualRefresh() {
     startRefreshTransition(() => {
@@ -437,6 +453,9 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
   );
 
   const tickerItems = items.slice(0, 10);
+  const selectedCategoryLabel = selectedCategory
+    ? INFORMATION_CATEGORY_LABELS[selectedCategory]
+    : null;
 
   return (
     <section className="relative mx-auto flex w-full max-w-[1540px] flex-col gap-4 px-3 py-3 text-white sm:px-5 lg:px-6 lg:py-4">
@@ -580,9 +599,20 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
               <span>时间</span>
               <span>信号内容</span>
             </div>
-            <span className="hidden shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 font-mono text-[0.68rem] tracking-[0.14em] text-slate-400 lg:inline-flex">
-              悬停暂停，离开继续
-            </span>
+            <div className="hidden items-center gap-2 lg:flex">
+              {selectedCategoryLabel ? (
+                <button
+                  type="button"
+                  className="rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 font-mono text-[0.68rem] tracking-[0.14em] text-amber-100 transition hover:bg-amber-300/15"
+                  onClick={() => setSelectedCategory(null)}
+                >
+                  当前 {selectedCategoryLabel} · 清除筛选
+                </button>
+              ) : null}
+              <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 font-mono text-[0.68rem] tracking-[0.14em] text-slate-400">
+                悬停暂停，离开继续
+              </span>
+            </div>
           </div>
 
           <div
@@ -616,17 +646,19 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
             onPointerUp={endManualScroll}
             onPointerCancel={endManualScroll}
           >
-            {items.length ? (
+            {filteredItems.length ? (
               <div className="grid pb-10">
-                {items.map((item) => renderFeedRow(item))}
+                {filteredItems.map((item) => renderFeedRow(item))}
               </div>
             ) : (
               <div className="flex h-full flex-col items-center justify-center px-6 text-center">
                 <p className="font-mono text-[0.9rem] uppercase tracking-[0.16em] text-amber-200/75">
-                  暂无信号
+                  {selectedCategoryLabel ? "筛选结果为空" : "暂无信号"}
                 </p>
                 <p className="mt-3 text-[1.35rem] font-semibold tracking-[-0.03em] text-white">
-                  暂无可滚动的当日商业资讯
+                  {selectedCategoryLabel
+                    ? `${selectedCategoryLabel} 下暂无可滚动资讯`
+                    : "暂无可滚动的当日商业资讯"}
                 </p>
               </div>
             )}
@@ -635,16 +667,35 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
 
         <aside className="space-y-4">
           <section className="overflow-hidden rounded-[1.4rem] border border-white/10 bg-[#060a11] shadow-[0_18px_60px_rgba(0,0,0,0.4)]">
-            <div className="border-b border-white/8 px-4 py-3">
+            <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3">
               <p className="font-mono text-[0.72rem] tracking-[0.16em] text-amber-200/75">
                 分类分布
               </p>
+              <button
+                type="button"
+                className="font-mono text-[0.68rem] tracking-[0.14em] text-slate-500 transition hover:text-slate-300 disabled:cursor-default disabled:text-slate-600"
+                onClick={() => setSelectedCategory(null)}
+                disabled={selectedCategory == null}
+              >
+                全部
+              </button>
             </div>
             <div className="space-y-3 px-4 py-4">
               {orderedCategories.map((entry) => (
-                <div
+                <button
                   key={entry.category}
-                  className="rounded-[1rem] border border-white/8 bg-white/[0.03] px-3 py-3"
+                  type="button"
+                  aria-pressed={selectedCategory === entry.category}
+                  onClick={() =>
+                    setSelectedCategory((current) =>
+                      current === entry.category ? null : entry.category
+                    )
+                  }
+                  className={`block w-full rounded-[1rem] border px-3 py-3 text-left transition ${
+                    selectedCategory === entry.category
+                      ? "border-amber-300/30 bg-amber-300/10 shadow-[0_0_0_1px_rgba(252,211,77,0.15)]"
+                      : "border-white/8 bg-white/[0.03] hover:border-white/14 hover:bg-white/[0.05]"
+                  }`}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-2">
@@ -673,7 +724,7 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
                       }}
                     />
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </section>
