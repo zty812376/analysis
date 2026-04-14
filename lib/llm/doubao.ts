@@ -31,11 +31,11 @@ function normalizeBaseUrl(baseUrl?: string | null) {
   return normalized.endsWith("/") ? normalized.slice(0, -1) : normalized;
 }
 
-function getDoubaoApiKey() {
+export function getDoubaoApiKey() {
   return process.env.ARK_API_KEY?.trim() || process.env.DOUBAO_API_KEY?.trim();
 }
 
-function getDoubaoBaseUrl() {
+export function getDoubaoBaseUrl() {
   return normalizeBaseUrl(
     process.env.ARK_BASE_URL?.trim() || process.env.DOUBAO_BASE_URL?.trim()
   );

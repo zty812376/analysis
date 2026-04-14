@@ -1,5 +1,6 @@
 import { extractWordDocumentText } from "@/lib/documents/extract-word-text";
 import { createSemanticChunks } from "@/lib/documents/semantic-chunker";
+import { saveDocumentChunkRecord } from "@/lib/postgres/document-chunk-records";
 
 export const runtime = "nodejs";
 
@@ -49,6 +50,14 @@ export async function POST(request: Request) {
     }
 
     const chunking = await createSemanticChunks(extracted.text);
+    const storage = await saveDocumentChunkRecord({
+      fileName: file.name,
+      fileSizeBytes: file.size,
+      fileType: extracted.fileType,
+      parser: extracted.parser,
+      extractedText: extracted.text,
+      chunking,
+    });
 
     return Response.json({
       fileName: file.name,
@@ -56,6 +65,11 @@ export async function POST(request: Request) {
       parser: extracted.parser,
       extractedTextLength: extracted.text.length,
       extractedTextPreview: extracted.text.slice(0, 500),
+      storage: {
+        provider: "postgresql",
+        recordId: storage.id,
+        savedAt: storage.createdAt,
+      },
       ...chunking,
     });
   } catch (error) {
