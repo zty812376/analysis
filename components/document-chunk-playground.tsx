@@ -46,7 +46,7 @@ const breakReasonLabels: Record<ChunkResponse["chunks"][number]["breakReason"], 
 const loadingSteps = [
   "正在上传文档",
   "正在提取正文内容",
-  "正在调用 Doubao 分析主题边界",
+  "正在分析主题边界",
   "正在整理分块结果",
 ];
 
@@ -126,7 +126,7 @@ export function DocumentChunkPlayground() {
       <header className="border-y border-[var(--rule)] py-3">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="font-serif text-3xl leading-[0.96] tracking-[-0.04em] text-zinc-950 sm:text-5xl lg:text-6xl">
+            <h1 className="font-serif text-xl leading-[0.96] tracking-[-0.04em] text-zinc-950 sm:text-5xl lg:text-6xl">
               文稿语义
               <br />
               结构拆解
