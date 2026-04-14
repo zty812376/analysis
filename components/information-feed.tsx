@@ -594,26 +594,6 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.16fr)_336px]">
         <section className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#04070c] shadow-[0_20px_70px_rgba(0,0,0,0.45)]">
-          <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3 sm:px-5">
-            <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-3 font-mono text-[0.68rem] tracking-[0.16em] text-slate-500 sm:grid-cols-[78px_minmax(0,1fr)]">
-              <span>时间</span>
-              <span>信号内容</span>
-            </div>
-            <div className="hidden items-center gap-2 lg:flex">
-              {selectedCategoryLabel ? (
-                <button
-                  type="button"
-                  className="rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 font-mono text-[0.68rem] tracking-[0.14em] text-amber-100 transition hover:bg-amber-300/15"
-                  onClick={() => setSelectedCategory(null)}
-                >
-                  当前 {selectedCategoryLabel} · 清除筛选
-                </button>
-              ) : null}
-              <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 font-mono text-[0.68rem] tracking-[0.14em] text-slate-400">
-                悬停暂停，离开继续
-              </span>
-            </div>
-          </div>
 
           <div
             ref={feedScrollAreaRef}
