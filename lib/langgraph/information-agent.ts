@@ -283,7 +283,7 @@ function classifyHeuristically(items: RawFeedItem[]) {
         category: inferCategory(combined),
         summary: normalizeText(summary).slice(0, 120),
         tags: topicTags,
-        reasoning: "未配置模型，已按中文关键词、栏目标签和来源规则分类。",
+        reasoning: "按中文关键词、栏目标签和来源规则分类。",
       };
     });
 }
@@ -435,37 +435,12 @@ const classifyCandidates: typeof InformationStateSchema.Node = async (state) => 
 
   const heuristicCandidates = state.candidates.filter(shouldKeepCandidate);
 
-  try {
-    if (!getDoubaoApiKey()) {
-      const classifiedItems = classifyHeuristically(heuristicCandidates);
-
-      return {
-        classifiedItems,
-        model: "heuristic-fallback",
-        notes: `classify: kept ${classifiedItems.length} items via heuristic fallback`,
-      };
-    }
-
-    const classifiedItems = await classifyWithModel(heuristicCandidates);
-
-    return {
-      classifiedItems,
-      model: DOUBAO_SEMANTIC_CHUNK_MODEL,
-      notes: `classify: kept ${classifiedItems.length} items via ${DOUBAO_SEMANTIC_CHUNK_MODEL}`,
-    };
-  } catch (error) {
-    const classifiedItems = classifyHeuristically(heuristicCandidates);
-
-    return {
-      classifiedItems,
-      model: "heuristic-fallback",
-      notes: `classify: fell back to heuristic mode with ${classifiedItems.length} items`,
-      errors:
-        error instanceof Error
-          ? `分类模型失败，已回退规则模式：${error.message}`
-          : "分类模型失败，已回退规则模式。",
-    };
-  }
+  const classifiedItems = classifyHeuristically(heuristicCandidates);
+  return {
+    classifiedItems,
+    model: "heuristic-fallback",
+    notes: `classify: kept ${classifiedItems.length} items via heuristic fallback`,
+  };
 };
 
 const persistCandidates: typeof InformationStateSchema.Node = async (state) => {
