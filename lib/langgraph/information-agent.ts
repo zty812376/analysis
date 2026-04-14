@@ -46,7 +46,6 @@ const ClassifiedItemSchema = RawFeedItemSchema.extend({
   id: z.string(),
   category: InformationCategorySchema,
   summary: z.string(),
-  importanceScore: z.number().int().min(1).max(10),
   tags: z.array(z.string()).default(() => []),
   reasoning: z.string(),
 });
@@ -67,7 +66,6 @@ const ModelClassificationSchema = z.array(
       ])
       .default("drop"),
     summaryZh: z.string(),
-    importanceScore: z.number().int().min(1).max(10),
     tagsZh: z.array(z.string()).default(() => []),
     reasoning: z.string(),
   })
@@ -273,7 +271,6 @@ function classifyHeuristically(items: RawFeedItem[]) {
         id: buildStableId(item),
         category: inferCategory(combined),
         summary: normalizeText(summary).slice(0, 120),
-        importanceScore: 5,
         tags: [
           item.feedLabel,
           ...topicTags,
@@ -324,7 +321,6 @@ async function classifyWithModel(items: RawFeedItem[]) {
         "分类只能是：company_update、deal_investment、macro_markets、ecommerce_retail、ai_technology、policy_regulation、drop。",
         "summaryZh 输出简洁中文摘要，一条不超过 70 个汉字。",
         "tagsZh 输出 2 到 4 个简短中文标签。",
-        "importanceScore 为 1 到 10 的整数，10 表示市场或行业影响很强。",
         "严格返回 JSON 数组，不要额外解释。",
       ].join("\n"),
       userPrompt: JSON.stringify(
@@ -361,7 +357,6 @@ async function classifyWithModel(items: RawFeedItem[]) {
         id: buildStableId(item),
         category: classified.category,
         summary: normalizeText(classified.summaryZh).slice(0, 120),
-        importanceScore: classified.importanceScore,
         tags: classified.tagsZh.map((tag) => normalizeText(tag)).filter(Boolean),
         reasoning: normalizeText(classified.reasoning),
       });
@@ -489,7 +484,6 @@ const persistCandidates: typeof InformationStateSchema.Node = async (state) => {
       feedLabel: item.feedLabel,
       author: item.author,
       publishedAt: item.publishedAt,
-      importanceScore: item.importanceScore,
       tags: item.tags,
       reasoning: item.reasoning,
       originalDescription: item.description,

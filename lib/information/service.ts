@@ -78,10 +78,15 @@ export async function refreshInformationFeed(input?: {
 }
 
 export async function getInformationSnapshot(input?: {
-  limit?: number;
+  limit?: number | null;
   hydrateIfEmpty?: boolean;
 }): Promise<InformationSnapshot> {
-  const limit = input?.limit ?? 24;
+  const limit =
+    typeof input?.limit === "number" &&
+    Number.isFinite(input.limit) &&
+    input.limit > 0
+      ? Math.floor(input.limit)
+      : null;
   const dayKey = formatInformationDayKey(new Date());
   let error: string | null = null;
 

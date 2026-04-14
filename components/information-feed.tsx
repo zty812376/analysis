@@ -155,7 +155,7 @@ function renderFeedRow(item: InformationItemRecord, keySuffix = "") {
   return (
     <article
       key={`${item.id}${keySuffix}`}
-      className="group grid grid-cols-[84px_96px_88px_74px_minmax(0,1fr)] gap-3 border-b border-white/8 px-4 py-3 transition hover:bg-white/[0.035] sm:grid-cols-[88px_112px_96px_80px_minmax(0,1fr)]"
+      className="group grid grid-cols-[84px_104px_92px_minmax(0,1fr)] gap-3 border-b border-white/8 px-4 py-3 transition hover:bg-white/[0.035] sm:grid-cols-[88px_120px_104px_minmax(0,1fr)]"
     >
       <div className="font-mono text-[0.78rem] font-medium tracking-[0.08em] text-amber-200">
         {formatHeadlineTime(item.publishedAt)}
@@ -172,10 +172,6 @@ function renderFeedRow(item: InformationItemRecord, keySuffix = "") {
 
       <div className="truncate font-mono text-[0.72rem] tracking-[0.08em] text-slate-400">
         {formatSourceLabel(item)}
-      </div>
-
-      <div className="font-mono text-[0.78rem] font-medium text-slate-200">
-        {String(item.importanceScore).padStart(2, "0")}
       </div>
 
       <div className="min-w-0">
@@ -223,11 +219,12 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
   const feedAnimationFrameRef = useRef<number | null>(null);
   const lastFeedFrameAtRef = useRef<number | null>(null);
   const feedManualScrollingRef = useRef(false);
+  const feedHoveringRef = useRef(false);
   const feedManualScrollStopTimerRef = useRef<number | null>(null);
   const items = useDeferredValue(snapshot.items);
 
   const fetchSnapshot = useEffectEvent(async () => {
-    const response = await fetch("/api/information?limit=28", {
+    const response = await fetch("/api/information", {
       cache: "no-store",
     });
 
@@ -346,7 +343,8 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
       }
 
       if (scrollArea && loopHeight > scrollArea.clientHeight) {
-        const isPaused = feedManualScrollingRef.current;
+        const isPaused =
+          feedManualScrollingRef.current || feedHoveringRef.current;
 
         if (!isPaused) {
           const deltaMs = timestamp - lastFeedFrameAtRef.current;
@@ -422,6 +420,14 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
     feedManualScrollingRef.current = true;
   }
 
+  function beginHoverPause() {
+    feedHoveringRef.current = true;
+  }
+
+  function endHoverPause() {
+    feedHoveringRef.current = false;
+  }
+
   function scheduleManualScrollStop(delayMs = 120) {
     if (feedManualScrollStopTimerRef.current != null) {
       window.clearTimeout(feedManualScrollStopTimerRef.current);
@@ -474,7 +480,6 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
             <span className="rounded-full border border-amber-300/25 bg-amber-300/10 px-2.5 py-1 text-amber-100">
               商业资讯线
             </span>
-            <span>LangGraph 日采集</span>
             <span>日期 {snapshot.dayKey}</span>
           </div>
 
@@ -486,27 +491,9 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
           </div>
         </div>
 
-        <div className="grid gap-4 px-4 py-4 sm:grid-cols-[minmax(0,1.18fr)_360px] sm:px-5">
-          <div>
-            <div className="flex flex-wrap items-center gap-2.5 font-mono text-[0.72rem] tracking-[0.16em] text-amber-200/75">
-              <span>高密度终端模式</span>
-              <span className="h-1 w-1 rounded-full bg-amber-200" />
-              <span>噪音已过滤</span>
-              <span className="h-1 w-1 rounded-full bg-amber-200" />
-              <span>仅显示当日</span>
-            </div>
-
-            <h1 className="mt-4 max-w-5xl text-[clamp(2.4rem,7vw,5rem)] font-black leading-[0.9] tracking-[-0.09em] text-white">
-              实时商业
-              <br />
-              资讯终端
-            </h1>
-
-            <p className="mt-4 max-w-3xl text-[0.96rem] leading-7 text-slate-300">
-              滚动流现在按终端密度重做：顶部是横向 headline ticker，中部是连续刷新的紧凑信号行，右侧是分类压力和运行指标。目标不是展示卡片，而是让你在一屏里扫到更多真正有业务含义的当日资讯。
-            </p>
-
-            <div className="mt-5 flex flex-wrap items-center gap-3">
+        <div className="grid gap-4 px-4 py-4 sm:px-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,680px)] lg:items-center">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
                 className="rounded-full bg-amber-300 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:bg-slate-600"
@@ -530,7 +517,7 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
             ) : null}
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-[1.15rem] border border-white/10 bg-white/[0.04] p-4">
               <p className="font-mono text-[0.7rem] tracking-[0.16em] text-amber-200/70">
                 原始抓取量
@@ -547,7 +534,7 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
                 {String(snapshot.latestRun?.savedCount ?? 0).padStart(3, "0")}
               </p>
             </div>
-            <div className="rounded-[1.15rem] border border-white/10 bg-white/[0.04] p-4 sm:col-span-2">
+            <div className="rounded-[1.15rem] border border-white/10 bg-white/[0.04] p-4">
               <p className="font-mono text-[0.7rem] tracking-[0.16em] text-amber-200/70">
                 分类模式
               </p>
@@ -623,21 +610,22 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.16fr)_336px]">
         <section className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#04070c] shadow-[0_20px_70px_rgba(0,0,0,0.45)]">
           <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3 sm:px-5">
-            <div className="grid grid-cols-[84px_96px_88px_74px_minmax(0,1fr)] gap-3 font-mono text-[0.68rem] tracking-[0.16em] text-slate-500 sm:grid-cols-[88px_112px_96px_80px_minmax(0,1fr)]">
+            <div className="grid grid-cols-[84px_104px_92px_minmax(0,1fr)] gap-3 font-mono text-[0.68rem] tracking-[0.16em] text-slate-500 sm:grid-cols-[88px_120px_104px_minmax(0,1fr)]">
               <span>时间</span>
               <span>分类</span>
               <span>来源</span>
-              <span>热度</span>
               <span>信号内容</span>
             </div>
             <span className="hidden shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 font-mono text-[0.68rem] tracking-[0.14em] text-slate-400 lg:inline-flex">
-              自动滚动，可手动介入
+              悬停暂停，离开继续
             </span>
           </div>
 
           <div
             ref={feedScrollAreaRef}
             className="information-feed-scroll-area relative h-[1000px] overflow-y-auto overscroll-contain"
+            onMouseEnter={beginHoverPause}
+            onMouseLeave={endHoverPause}
             onScroll={() => {
               const scrollArea = feedScrollAreaRef.current;
 

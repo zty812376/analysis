@@ -59,7 +59,6 @@ export type InformationItemRecord = {
   feedLabel: string;
   author: string | null;
   publishedAt: string;
-  importanceScore: number;
   tags: string[];
   reasoning: string;
 };

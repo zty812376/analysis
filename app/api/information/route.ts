@@ -16,11 +16,14 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const limitValue = Number(url.searchParams.get("limit") ?? 28);
+  const rawLimit = url.searchParams.get("limit");
+  const numericLimit = rawLimit == null ? Number.NaN : Number(rawLimit);
   const limit =
-    Number.isFinite(limitValue) && limitValue > 0
-      ? Math.min(Math.floor(limitValue), 60)
-      : 28;
+    rawLimit == null || rawLimit === "all"
+      ? null
+      : Number.isFinite(numericLimit) && numericLimit > 0
+        ? Math.floor(numericLimit)
+        : null;
 
   try {
     const snapshot = await getInformationSnapshot({
@@ -65,7 +68,7 @@ export async function POST(request: Request) {
       force: parsed.data?.force ?? true,
     });
     const snapshot = await getInformationSnapshot({
-      limit: 28,
+      limit: null,
       hydrateIfEmpty: false,
     });
 

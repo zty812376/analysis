@@ -22,7 +22,6 @@ type StoredInformationItemInput = {
   feedLabel: string;
   author: string | null;
   publishedAt: string;
-  importanceScore: number;
   tags: string[];
   reasoning: string;
   originalDescription: string;
@@ -129,7 +128,6 @@ async function ensureInformationTables() {
           feed_label text NOT NULL,
           author text,
           published_at timestamptz NOT NULL,
-          importance_score integer NOT NULL,
           tags jsonb NOT NULL,
           reasoning text NOT NULL,
           original_description text NOT NULL,
@@ -146,8 +144,17 @@ async function ensureInformationTables() {
       `);
 
       await pool.query(`
+        DROP INDEX IF EXISTS information_items_day_key_idx
+      `);
+
+      await pool.query(`
+        ALTER TABLE information_items
+        DROP COLUMN IF EXISTS importance_score
+      `);
+
+      await pool.query(`
         CREATE INDEX IF NOT EXISTS information_items_day_key_idx
-        ON information_items (day_key, importance_score DESC, published_at DESC)
+        ON information_items (day_key, published_at DESC)
       `);
 
       await pool.query(`
@@ -206,7 +213,6 @@ function mapItemRow(row: {
   feed_label: string;
   author: string | null;
   published_at: Date;
-  importance_score: number;
   tags: string[];
   reasoning: string;
 }): InformationItemRecord {
@@ -224,7 +230,6 @@ function mapItemRow(row: {
     feedLabel: row.feed_label,
     author: row.author,
     publishedAt: row.published_at.toISOString(),
-    importanceScore: row.importance_score,
     tags: row.tags,
     reasoning: row.reasoning,
   };
@@ -268,7 +273,6 @@ export async function saveInformationRun(input: SaveInformationRunInput) {
             feed_label,
             author,
             published_at,
-            importance_score,
             tags,
             reasoning,
             original_description,
@@ -276,8 +280,8 @@ export async function saveInformationRun(input: SaveInformationRunInput) {
             run_id
           )
           VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
-            $12, $13, $14::jsonb, $15, $16, $17::jsonb, $18
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+            $11, $12::jsonb, $13, $14, $15::jsonb, $16
           )
           ON CONFLICT (id) DO UPDATE SET
             day_key = EXCLUDED.day_key,
@@ -291,7 +295,6 @@ export async function saveInformationRun(input: SaveInformationRunInput) {
             feed_label = EXCLUDED.feed_label,
             author = EXCLUDED.author,
             published_at = EXCLUDED.published_at,
-            importance_score = EXCLUDED.importance_score,
             tags = EXCLUDED.tags,
             reasoning = EXCLUDED.reasoning,
             original_description = EXCLUDED.original_description,
@@ -312,7 +315,6 @@ export async function saveInformationRun(input: SaveInformationRunInput) {
           item.feedLabel,
           item.author,
           item.publishedAt,
-          item.importanceScore,
           JSON.stringify(item.tags),
           item.reasoning,
           item.originalDescription,
@@ -479,28 +481,18 @@ export async function getLatestInformationRunForDay(dayKey: string) {
   return row ? mapRunRow(row) : null;
 }
 
-export async function listInformationItemsByDay(dayKey: string, limit = 24) {
+function hasQueryLimit(limit?: number | null): limit is number {
+  return typeof limit === "number" && Number.isFinite(limit) && limit > 0;
+}
+
+export async function listInformationItemsByDay(
+  dayKey: string,
+  limit?: number | null
+) {
   await ensureInformationTables();
 
   const pool = getPostgresPool();
-  const result = await pool.query<{
-    id: string;
-    day_key: string;
-    category: InformationCategoryKey;
-    title: string;
-    summary: string;
-    source_name: string;
-    source_domain: string;
-    source_url: string;
-    feed_key: string;
-    feed_label: string;
-    author: string | null;
-    published_at: Date;
-    importance_score: number;
-    tags: string[];
-    reasoning: string;
-  }>(
-    `
+  const baseQuery = `
       SELECT
         id,
         day_key,
@@ -514,42 +506,40 @@ export async function listInformationItemsByDay(dayKey: string, limit = 24) {
         feed_label,
         author,
         published_at,
-        importance_score,
         tags,
         reasoning
       FROM information_items
       WHERE day_key = $1
-      ORDER BY importance_score DESC, published_at DESC
-      LIMIT $2
-    `,
-    [dayKey, limit]
+      ORDER BY published_at DESC
+    `;
+  const result = await pool.query<{
+    id: string;
+    day_key: string;
+    category: InformationCategoryKey;
+    title: string;
+    summary: string;
+    source_name: string;
+    source_domain: string;
+    source_url: string;
+    feed_key: string;
+    feed_label: string;
+    author: string | null;
+    published_at: Date;
+    tags: string[];
+    reasoning: string;
+  }>(
+    hasQueryLimit(limit) ? `${baseQuery}\n      LIMIT $2` : baseQuery,
+    hasQueryLimit(limit) ? [dayKey, limit] : [dayKey]
   );
 
   return result.rows.map(mapItemRow);
 }
 
-export async function listLatestInformationItems(limit = 24) {
+export async function listLatestInformationItems(limit?: number | null) {
   await ensureInformationTables();
 
   const pool = getPostgresPool();
-  const result = await pool.query<{
-    id: string;
-    day_key: string;
-    category: InformationCategoryKey;
-    title: string;
-    summary: string;
-    source_name: string;
-    source_domain: string;
-    source_url: string;
-    feed_key: string;
-    feed_label: string;
-    author: string | null;
-    published_at: Date;
-    importance_score: number;
-    tags: string[];
-    reasoning: string;
-  }>(
-    `
+  const baseQuery = `
       SELECT
         id,
         day_key,
@@ -563,14 +553,29 @@ export async function listLatestInformationItems(limit = 24) {
         feed_label,
         author,
         published_at,
-        importance_score,
         tags,
         reasoning
       FROM information_items
-      ORDER BY day_key DESC, importance_score DESC, published_at DESC
-      LIMIT $1
-    `,
-    [limit]
+      ORDER BY day_key DESC, published_at DESC
+    `;
+  const result = await pool.query<{
+    id: string;
+    day_key: string;
+    category: InformationCategoryKey;
+    title: string;
+    summary: string;
+    source_name: string;
+    source_domain: string;
+    source_url: string;
+    feed_key: string;
+    feed_label: string;
+    author: string | null;
+    published_at: Date;
+    tags: string[];
+    reasoning: string;
+  }>(
+    hasQueryLimit(limit) ? `${baseQuery}\n      LIMIT $1` : baseQuery,
+    hasQueryLimit(limit) ? [limit] : []
   );
 
   return result.rows.map(mapItemRow);

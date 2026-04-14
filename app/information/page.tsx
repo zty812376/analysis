@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 export default async function InformationPage() {
   const snapshot = await getInformationSnapshot({
-    limit: 28,
+    limit: null,
     hydrateIfEmpty: true,
   });
 
