@@ -4,6 +4,7 @@ import {
   formatInformationDayKey,
   isInformationStale,
 } from "@/lib/information/date";
+import { filterDisplayableInformationItems } from "@/lib/information/content-filter";
 import {
   countInformationItemsByCategory,
   getLatestInformationRun,
@@ -87,12 +88,15 @@ export async function getInformationSnapshot(input?: {
     input.limit > 0
       ? Math.floor(input.limit)
       : null;
+  const queryLimit = limit ? limit * 3 : null;
   const dayKey = formatInformationDayKey(new Date());
   let error: string | null = null;
 
   if (input?.hydrateIfEmpty) {
     const todayRun = await getLatestInformationRunForDay(dayKey);
-    const todayItems = await listInformationItemsByDay(dayKey, limit);
+    const todayItems = filterDisplayableInformationItems(
+      await listInformationItemsByDay(dayKey, queryLimit)
+    ).slice(0, limit ?? undefined);
 
     if (
       !todayRun ||
@@ -108,9 +112,15 @@ export async function getInformationSnapshot(input?: {
   }
 
   const latestRun = await getLatestInformationRun();
-  const todayItems = await listInformationItemsByDay(dayKey, limit);
+  const todayItems = filterDisplayableInformationItems(
+    await listInformationItemsByDay(dayKey, queryLimit)
+  ).slice(0, limit ?? undefined);
   const items =
-    todayItems.length > 0 ? todayItems : await listLatestInformationItems(limit);
+    todayItems.length > 0
+      ? todayItems
+      : filterDisplayableInformationItems(
+          await listLatestInformationItems(queryLimit)
+        ).slice(0, limit ?? undefined);
 
   return {
     dayKey,

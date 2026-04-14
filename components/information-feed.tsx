@@ -133,22 +133,6 @@ function formatModelLabel(value: string | null | undefined) {
   return value;
 }
 
-function wrapFeedScrollPosition(value: number, loopHeight: number) {
-  if (loopHeight <= 0) {
-    return value;
-  }
-
-  if (value >= loopHeight) {
-    return value % loopHeight;
-  }
-
-  if (value < 0) {
-    return ((value % loopHeight) + loopHeight) % loopHeight;
-  }
-
-  return value;
-}
-
 function renderFeedRow(item: InformationItemRecord, keySuffix = "") {
   const tone = categoryTones[item.category];
 
@@ -162,41 +146,38 @@ function renderFeedRow(item: InformationItemRecord, keySuffix = "") {
       </div>
 
       <div className="min-w-0">
-        <div className="flex items-start gap-2.5">
-          <div className={`mt-1 h-9 w-1 rounded-full ${tone.meterClassName}`} />
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-              <span className="max-w-full truncate font-mono text-[0.7rem] tracking-[0.12em] text-amber-200/90">
-                {formatSourceLabel(item)}
-              </span>
-              <h3 className="min-w-0 flex-1 text-[0.96rem] font-semibold leading-5 tracking-[-0.02em] text-white">
-                <a
-                  href={item.sourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="transition hover:text-amber-100"
-                >
-                  {item.title}
-                </a>
-              </h3>
-            </div>
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.74rem] text-slate-400">
-              {item.author ? <span>{item.author}</span> : null}
-              <span>{formatPublishedAt(item.publishedAt)}</span>
-            </div>
-            <p className="mt-1 text-[0.84rem] leading-6 text-slate-300">
-              {item.summary}
-            </p>
-            <div className="mt-2">
-              <span
-                className={`inline-flex max-w-full items-center gap-2 rounded-full px-2.5 py-1 text-[0.64rem] font-medium uppercase tracking-[0.14em] ${tone.chipClassName}`}
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <span className="max-w-full truncate font-mono text-[0.7rem] tracking-[0.12em] text-amber-200/90">
+              {formatSourceLabel(item)}
+            </span>
+            <h3 className="min-w-0 flex-1 text-[0.96rem] font-semibold leading-5 tracking-[-0.02em] text-white">
+              <a
+                href={item.sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="transition hover:text-amber-100"
               >
-                <span
-                  className={`h-1.5 w-1.5 rounded-full ${tone.dotClassName}`}
-                />
-                <span className="truncate">{item.categoryLabel}</span>
-              </span>
-            </div>
+                {item.title}
+              </a>
+            </h3>
+          </div>
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.74rem] text-slate-400">
+            {item.author ? <span>{item.author}</span> : null}
+            <span>{formatPublishedAt(item.publishedAt)}</span>
+          </div>
+          <p className="mt-1 text-[0.84rem] leading-6 text-slate-300">
+            {item.summary}
+          </p>
+          <div className="mt-2">
+            <span
+              className={`inline-flex max-w-full items-center gap-2 rounded-full px-2.5 py-1 text-[0.64rem] font-medium uppercase tracking-[0.14em] ${tone.chipClassName}`}
+            >
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${tone.dotClassName}`}
+              />
+              <span className="truncate">{item.categoryLabel}</span>
+            </span>
           </div>
         </div>
       </div>
@@ -213,9 +194,6 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(false);
   const lastRefreshAttemptAtRef = useRef(0);
   const feedScrollAreaRef = useRef<HTMLDivElement | null>(null);
-  const primaryFeedBlockRef = useRef<HTMLDivElement | null>(null);
-  const feedLoopHeightRef = useRef(0);
-  const feedVirtualScrollTopRef = useRef(0);
   const feedProgrammaticScrollRef = useRef(false);
   const feedAnimationFrameRef = useRef<number | null>(null);
   const lastFeedFrameAtRef = useRef<number | null>(null);
@@ -304,59 +282,46 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
   }, []);
 
   useEffect(() => {
-    const block = primaryFeedBlockRef.current;
+    const scrollArea = feedScrollAreaRef.current;
 
-    if (!block) {
+    if (!scrollArea) {
       return;
     }
 
-    const updateLoopHeight = () => {
-      feedLoopHeightRef.current = block.offsetHeight;
-      feedVirtualScrollTopRef.current = wrapFeedScrollPosition(
-        feedVirtualScrollTopRef.current,
-        feedLoopHeightRef.current
-      );
+    const maxScrollTop = Math.max(
+      0,
+      scrollArea.scrollHeight - scrollArea.clientHeight
+    );
 
-      if (feedScrollAreaRef.current) {
-        feedProgrammaticScrollRef.current = true;
-        feedScrollAreaRef.current.scrollTop = feedVirtualScrollTopRef.current;
-      }
-    };
-
-    updateLoopHeight();
-
-    const observer = new ResizeObserver(() => {
-      updateLoopHeight();
-    });
-
-    observer.observe(block);
-
-    return () => observer.disconnect();
+    if (scrollArea.scrollTop > maxScrollTop) {
+      feedProgrammaticScrollRef.current = true;
+      scrollArea.scrollTop = maxScrollTop;
+    }
   }, [items]);
 
   useEffect(() => {
     const tick = (timestamp: number) => {
       const scrollArea = feedScrollAreaRef.current;
-      const loopHeight = feedLoopHeightRef.current;
 
       if (lastFeedFrameAtRef.current == null) {
         lastFeedFrameAtRef.current = timestamp;
       }
 
-      if (scrollArea && loopHeight > scrollArea.clientHeight) {
+      if (scrollArea) {
+        const maxScrollTop = Math.max(
+          0,
+          scrollArea.scrollHeight - scrollArea.clientHeight
+        );
         const isPaused =
           feedManualScrollingRef.current || feedHoveringRef.current;
 
-        if (!isPaused) {
+        if (!isPaused && maxScrollTop > 0) {
           const deltaMs = timestamp - lastFeedFrameAtRef.current;
-          const nextScrollTop = wrapFeedScrollPosition(
-            feedVirtualScrollTopRef.current + deltaMs * 0.08,
-            loopHeight
-          );
+          const nextScrollTop = scrollArea.scrollTop + deltaMs * 0.08;
 
-          feedVirtualScrollTopRef.current = nextScrollTop;
           feedProgrammaticScrollRef.current = true;
-          scrollArea.scrollTop = nextScrollTop;
+          scrollArea.scrollTop =
+            nextScrollTop >= maxScrollTop ? 0 : nextScrollTop;
         }
       }
 
@@ -639,18 +604,6 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
 
               beginManualScroll();
               scheduleManualScrollStop();
-
-              const wrappedScrollTop = wrapFeedScrollPosition(
-                scrollArea.scrollTop,
-                feedLoopHeightRef.current
-              );
-
-              feedVirtualScrollTopRef.current = wrappedScrollTop;
-
-              if (wrappedScrollTop !== scrollArea.scrollTop) {
-                feedProgrammaticScrollRef.current = true;
-                scrollArea.scrollTop = wrappedScrollTop;
-              }
             }}
             onWheel={() => {
               beginManualScroll();
@@ -665,12 +618,7 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
           >
             {items.length ? (
               <div className="grid pb-10">
-                <div ref={primaryFeedBlockRef} className="grid">
-                  {items.map((item) => renderFeedRow(item))}
-                </div>
-                <div aria-hidden="true" className="grid">
-                  {items.map((item) => renderFeedRow(item, ":mirror"))}
-                </div>
+                {items.map((item) => renderFeedRow(item))}
               </div>
             ) : (
               <div className="flex h-full flex-col items-center justify-center px-6 text-center">

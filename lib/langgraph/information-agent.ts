@@ -12,6 +12,7 @@ import {
   INFORMATION_TIMEZONE,
   isInformationPublishedOnDay,
 } from "@/lib/information/date";
+import { isPureAnnouncementLike } from "@/lib/information/content-filter";
 import { saveInformationRun } from "@/lib/information/storage";
 import type { InformationCategoryKey } from "@/lib/information/types";
 import {
@@ -241,6 +242,16 @@ function shouldKeepCandidate(item: RawFeedItem) {
     return false;
   }
 
+  if (
+    isPureAnnouncementLike({
+      title: item.title,
+      body: item.description,
+      topics: item.topics,
+    })
+  ) {
+    return false;
+  }
+
   if (noisyPatterns.some((pattern) => pattern.test(combined))) {
     return false;
   }
@@ -314,6 +325,7 @@ async function classifyWithModel(items: RawFeedItem[]) {
       systemPrompt: [
         "你是一名商业资讯编辑，负责筛选并分类当天来自中文信息源的资讯。",
         "只保留真正和商业、公司、并购、投融资、宏观市场、电商零售、AI 科技、政策监管有关的资讯。",
+        "必须丢弃纯公告披露类内容，如董事会或监事会决议、股东大会决议、提示性公告、补充或更正公告、问询函或回复函、权益变动报告书、招股说明书、停牌核查等；只有公告本身包含明确重大商业实质时才保留。",
         "必须丢弃以下类型：事故、犯罪、灾难、娱乐八卦、名人穿搭、购物清单、折扣推荐、消费导购、体育、文化生活方式、与商业影响无关的泛社会热点。",
         "分类只能是：company_update、deal_investment、macro_markets、ecommerce_retail、ai_technology、policy_regulation、drop。",
         "summaryZh 输出简洁中文摘要，一条不超过 70 个汉字。",
