@@ -169,7 +169,7 @@ function renderFeedRow(item: InformationItemRecord, keySuffix = "") {
           <p className="mt-1 text-[0.84rem] leading-6 text-slate-300">
             {item.summary}
           </p>
-          <div className="mt-2">
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
             <span
               className={`inline-flex max-w-full items-center gap-2 rounded-full px-2.5 py-1 text-[0.64rem] font-medium uppercase tracking-[0.14em] ${tone.chipClassName}`}
             >
@@ -178,6 +178,14 @@ function renderFeedRow(item: InformationItemRecord, keySuffix = "") {
               />
               <span className="truncate">{item.categoryLabel}</span>
             </span>
+            {item.tags.map((tag, index) => (
+              <span
+                key={`${item.id}:tag:${index}:${tag}`}
+                className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[0.66rem] text-slate-300"
+              >
+                #{tag}
+              </span>
+            ))}
           </div>
         </div>
       </div>

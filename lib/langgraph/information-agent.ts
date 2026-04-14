@@ -269,21 +269,20 @@ function classifyHeuristically(items: RawFeedItem[]) {
     .map<ClassifiedItem>((item) => {
       const combined = getCombinedItemText(item);
       const summary = item.description
-      const topicTags = item.topics
-        .map((topic) => normalizeText(topic))
-        .filter(Boolean)
-        .slice(0, 2);
+      const topicTags = Array.from(
+        new Set(
+          item.topics
+            .map((topic) => normalizeText(topic))
+            .filter(Boolean)
+        )
+      );
 
       return {
         ...item,
         id: buildStableId(item),
         category: inferCategory(combined),
         summary: normalizeText(summary).slice(0, 120),
-        tags: [
-          item.feedLabel,
-          ...topicTags,
-          item.sourceDomain || item.sourceName,
-        ].filter(Boolean),
+        tags: topicTags,
         reasoning: "未配置模型，已按中文关键词、栏目标签和来源规则分类。",
       };
     });
