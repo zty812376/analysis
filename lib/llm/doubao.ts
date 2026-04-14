@@ -82,30 +82,41 @@ export async function createDoubaoChatCompletion(input: {
     throw new Error("未配置 ARK_API_KEY。请在 .env 中设置 Doubao/Ark API Key。");
   }
 
-  const response = await fetch(`${getDoubaoBaseUrl()}/chat/completions`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    cache: "no-store",
-    body: JSON.stringify({
-      model: DOUBAO_SEMANTIC_CHUNK_MODEL,
-      stream: false,
-      temperature: input.temperature ?? 0.2,
-      max_tokens: input.maxTokens ?? 4000,
-      messages: [
-        {
-          role: "system",
-          content: input.systemPrompt,
-        },
-        {
-          role: "user",
-          content: input.userPrompt,
-        },
-      ],
-    }),
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(`${getDoubaoBaseUrl()}/chat/completions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+      signal: AbortSignal.timeout(25_000),
+      body: JSON.stringify({
+        model: DOUBAO_SEMANTIC_CHUNK_MODEL,
+        stream: false,
+        temperature: input.temperature ?? 0.2,
+        max_tokens: input.maxTokens ?? 4000,
+        messages: [
+          {
+            role: "system",
+            content: input.systemPrompt,
+          },
+          {
+            role: "user",
+            content: input.userPrompt,
+          },
+        ],
+      }),
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Doubao Chat 请求失败：${error.message}`);
+    }
+
+    throw new Error("Doubao Chat 请求失败。");
+  }
 
   if (!response.ok) {
     throw new Error(await readProviderError(response));
