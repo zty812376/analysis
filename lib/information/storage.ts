@@ -281,7 +281,7 @@ export async function saveInformationRun(input: SaveInformationRunInput) {
           )
           VALUES (
             $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-            $11, $12::jsonb, $13, $14, $15::jsonb, $16
+            $11, $12, $13::jsonb, $14, $15, $16::jsonb, $17
           )
           ON CONFLICT (id) DO UPDATE SET
             day_key = EXCLUDED.day_key,
