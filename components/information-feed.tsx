@@ -527,14 +527,6 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
                 {String(snapshot.latestRun?.savedCount ?? 0).padStart(3, "0")}
               </p>
             </div>
-            <div className="rounded-[1.15rem] border border-white/10 bg-white/[0.04] p-4">
-              <p className="font-mono text-[0.7rem] tracking-[0.16em] text-amber-200/70">
-                分类模式
-              </p>
-              <p className="mt-3 break-all font-mono text-[0.9rem] leading-6 text-white">
-                {formatModelLabel(snapshot.latestRun?.model)}
-              </p>
-            </div>
           </div>
         </div>
 
