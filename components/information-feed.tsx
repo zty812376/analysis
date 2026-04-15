@@ -495,10 +495,6 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
               >
                 {isPending || isAutoRefreshing ? "同步进行中..." : "立即拉取新资讯"}
               </button>
-              <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 font-mono text-[0.78rem] uppercase tracking-[0.14em] text-slate-300">
-                资讯 {String(snapshot.items.length).padStart(2, "0")} · 分类{" "}
-                {orderedCategories.filter((entry) => entry.count > 0).length}
-              </div>
             </div>
 
             {refreshError ? (
