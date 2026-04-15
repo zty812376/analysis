@@ -497,9 +497,7 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
               </button>
               <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 font-mono text-[0.78rem] uppercase tracking-[0.14em] text-slate-300">
                 资讯 {String(snapshot.items.length).padStart(2, "0")} · 分类{" "}
-                {String(
-                  orderedCategories.filter((entry) => entry.count > 0).length
-                ).padStart(2, "0")}
+                {orderedCategories.filter((entry) => entry.count > 0).length}
               </div>
             </div>
 
@@ -516,7 +514,7 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
                 原始抓取量
               </p>
               <p className="mt-3 font-mono text-[2rem] font-semibold text-white">
-                {String(snapshot.latestRun?.rawCount ?? 0).padStart(3, "0")}
+                {snapshot.latestRun?.rawCount ?? 0}
               </p>
             </div>
             <div className="rounded-[1.15rem] border border-white/10 bg-white/[0.04] p-4">
@@ -524,7 +522,7 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
                 入库数量
               </p>
               <p className="mt-3 font-mono text-[2rem] font-semibold text-white">
-                {String(snapshot.latestRun?.savedCount ?? 0).padStart(3, "0")}
+                {snapshot.latestRun?.savedCount ?? 0}
               </p>
             </div>
           </div>
@@ -687,7 +685,7 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
                       </p>
                     </div>
                     <span className="font-mono text-[0.82rem] text-slate-300">
-                      {String(entry.count).padStart(2, "0")}
+                      {entry.count}
                     </span>
                   </div>
                   <p className="mt-1 text-[0.8rem] leading-6 text-slate-400">
