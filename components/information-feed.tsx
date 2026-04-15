@@ -477,25 +477,23 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-[0.76rem] text-slate-400">
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono tracking-[0.14em] text-white">
-              {statusLabel}
-            </span>
-            <span>最近同步 {formatRunAt(snapshot.latestRun?.createdAt)}</span>
-          </div>
-        </div>
-
-        <div className="grid gap-4 px-4 py-4 sm:px-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,680px)] lg:items-center">
-          <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
-                className="rounded-full bg-amber-300 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:bg-slate-600"
+                className="rounded-full bg-amber-300 px-3 py-1 text-sm font-semibold text-slate-950 transition hover:bg-amber-200 disabled:cursor-not-allowed disabled:bg-slate-600"
                 onClick={handleManualRefresh}
                 disabled={isPending || isAutoRefreshing}
               >
                 {isPending || isAutoRefreshing ? "同步进行中..." : "立即拉取新资讯"}
               </button>
             </div>
+            <span>最近同步 {formatRunAt(snapshot.latestRun?.createdAt)}</span>
+          </div>
+        </div>
+
+        <div className="grid gap-4 px-4 py-4 sm:px-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,680px)] lg:items-center">
+          <div className="min-w-0">
+            
 
             {refreshError ? (
               <p className="mt-4 rounded-[0.95rem] border border-rose-300/20 bg-rose-300/10 px-4 py-3 text-sm leading-6 text-rose-100">
@@ -507,7 +505,7 @@ export function InformationFeed({ initialSnapshot }: InformationFeedProps) {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-[1.15rem] border border-white/10 bg-white/[0.04] p-4">
               <p className="font-mono text-[0.7rem] tracking-[0.16em] text-amber-200/70">
-                原始抓取量
+                抓取量
               </p>
               <p className="mt-3 font-mono text-[2rem] font-semibold text-white">
                 {snapshot.latestRun?.rawCount ?? 0}
